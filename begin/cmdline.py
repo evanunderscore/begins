@@ -13,7 +13,7 @@ try:
 except ImportError:
     from funcsigs import signature
 
-from begin import context, extensions, subcommands, utils
+from begin import context, docparse, extensions, subcommands, utils
 
 __all__ = ['create_parser', 'populate_parser',
            'apply_options', 'call_function']
@@ -168,7 +168,7 @@ def create_parser(func, env_prefix=None, config_file=None, config_section=None,
             prog=program_name(sys.argv[0], func),
             argument_default=NODEFAULT,
             conflict_handler='resolve',
-            description = func.__doc__,
+            description=docparse.parse_doc(func).text,
             formatter_class=formatter_class
     )
     collector = collector if collector is not None else subcommands.COLLECTORS[sub_group]
