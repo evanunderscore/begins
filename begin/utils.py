@@ -31,3 +31,24 @@ def tolist(value=None, sep=',', empty_strings=False):
     if value is None:
         return tolist
     return tolist(value)
+
+
+def toenum(enum):
+    """Return a function that converts a string to a member of enum."""
+    def get_enum(thing):
+        """Return the given enum member.
+
+        If thing is already an enum member, return it unmodified.
+        If thing is the name of an enum member, return the member.
+        If thing is invalid, the error message contains the valid options.
+        """
+        # Want to be able to pass Enum.member from code.
+        if thing in enum:
+            return thing
+        try:
+            return enum[thing]
+        except KeyError:
+            msg = 'Invalid {} value "{}"; valid choices are: {}'
+            choices = ', '.join([x.name for x in enum])
+            raise ValueError(msg.format(enum.__name__, thing, choices))
+    return get_enum

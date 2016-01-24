@@ -1,6 +1,7 @@
 "Type casting for function arguments"
 from __future__ import absolute_import, division, print_function
 import functools
+import inspect
 import sys
 
 try:
@@ -59,7 +60,10 @@ def convert(_automatic=False, **mappings):
             for param in sig.parameters.values():
                 if param.name in mappings or param.default is param.empty:
                     continue
-                converter = CONVERTERS.get(type(param.default))
+                if _isenum(type(param.default)):
+                    converter = lambda _: utils.toenum(type(param.default))
+                else:
+                    converter = CONVERTERS.get(type(param.default))
                 if converter:
                     mappings[param.name] = converter(param.default)
         @functools.wraps(func)
@@ -94,3 +98,17 @@ def convert(_automatic=False, **mappings):
         wrapper.__wrapped__ = func
         return wrapper
     return decorator
+
+
+def _isenum(thing):
+    """Determine whether thing is an Enum."""
+    # enum is optional, and if the user doesn't have it, this isn't an Enum.
+    try:
+        import enum
+    except ImportError:
+        return False
+
+    if inspect.isclass(thing) and issubclass(thing, enum.Enum):
+        return True
+
+    return False
